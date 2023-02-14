@@ -62,6 +62,9 @@
        The fully qualified main class name.
        Only used if isApplication is true.
     # Output File
+    - handleOutFile:
+       If true the script will handle the file output
+       Default: false
     - outFileFormat:
        The format for the output file name.
        Default: %{name}-%{version}%{'+'paperVersion}.jar
@@ -348,44 +351,46 @@ jar {
     }
 }
 
-File outFile
-String fileName
-String outDir
-tasks {
-    /* handle file name and build dir */
-    String fnFormat = propertyOr("outFileFormat", "%{name}-%{version}%{'+'paperVersion}.jar")
-    String odFormat = propertyOr("outDirFormat", "%{buildDir}/libs/"); // output dir format
-    Map<String, Object> values = new HashMap<>();
+if (propertyOr("handleOutFile", false)) {
 
-    // put properties //
+    File outFile
+    String fileName
+    String outDir
+    tasks {
+        /* handle file name and build dir */
+        String fnFormat = propertyOr("outFileFormat", "%{name}-%{version}%{'+'paperVersion}.jar")
+        String odFormat = propertyOr("outDirFormat", "%{buildDir}/libs/"); // output dir format
+        Map<String, Object> values = new HashMap<>();
 
-    values.put("name", project.name)
-    values.put("version", project.version)
-    values.put("group", project.group)
-    values.put("buildDir", project.buildDir)
+        // put properties //
 
-    if (hasPaper())
-        values.put("paperVersion", propertyOr("paperVersion", null))
+        values.put("name", project.name)
+        values.put("version", project.version)
+        values.put("group", project.group)
+        values.put("buildDir", project.buildDir)
 
-    // set output file
-    fileName = replacePlaceholders(fnFormat, values);
-    outDir   = replacePlaceholders(odFormat, values);
-    outFile  = new File(outDir as String, fileName as String);
-    setOutputFile(outFile)
-}
+        if (hasPaper())
+            values.put("paperVersion", propertyOr("paperVersion", null))
 
-shadowJar {
-    archiveBaseName.set(fileName)
-    archiveClassifier.set('')
-    archiveVersion.set('')
-
-
-}
-
-if (hasPaper()) {
-    reobfJar {
-
+        // set output file
+        fileName = replacePlaceholders(fnFormat, values);
+        outDir = replacePlaceholders(odFormat, values);
+        outFile = new File(outDir as String, fileName as String);
+        setOutputFile(outFile)
     }
+
+    shadowJar {
+        archiveBaseName.set(fileName)
+        archiveClassifier.set('')
+        archiveVersion.set('')
+    }
+
+    if (hasPaper()) {
+        reobfJar {
+
+        }
+    }
+
 }
 
 /* General Dependencies */
