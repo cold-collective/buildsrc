@@ -568,3 +568,11 @@ task("secureGitignore") {
         ensureGitignoreSecurity(pathInRoot(".gitignore"))
     }
 }
+
+// publish all task
+Task pubAllTask = rootProject.tasks.getAsMap().get("publishAll")
+if (pubAllTask != null) {
+    if (hasPublishing()) {
+        task("publish").mustRunAfter(pubAllTask)
+    }
+}
